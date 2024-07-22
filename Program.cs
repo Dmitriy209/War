@@ -86,10 +86,10 @@ namespace War
 
             Console.WriteLine($"\nБой закончился в {numberRound} раунде.\n");
 
-            DeterminationOfTheWinner(firstPlatoon, secondPlatoon);
+            DetermineOfWinner(firstPlatoon, secondPlatoon);
         }
 
-        private void DeterminationOfTheWinner(Platoon firstPlatoon, Platoon secondPlatoon)
+        private void DetermineOfWinner(Platoon firstPlatoon, Platoon secondPlatoon)
         {
             if (firstPlatoon.Count > 0 && secondPlatoon.Count == 0)
             {
