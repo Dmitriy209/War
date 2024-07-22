@@ -86,6 +86,11 @@ namespace War
 
             Console.WriteLine($"\nБой закончился в {numberRound} раунде.\n");
 
+            DeterminationOfTheWinner(firstPlatoon, secondPlatoon);
+        }
+
+        private void DeterminationOfTheWinner(Platoon firstPlatoon, Platoon secondPlatoon)
+        {
             if (firstPlatoon.Count > 0 && secondPlatoon.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -124,7 +129,7 @@ namespace War
             {
                 for (int i = 0; i < _soldiers.Count; i++)
                 {
-                    _soldiers[i].Attack(platoon._soldiers);
+                    _soldiers[i].Attack(platoon.GetCopyListSoldiers());
                 }
 
                 platoon.DeleteDeads();
@@ -135,6 +140,16 @@ namespace War
             }
         }
 
+        public List<Soldier> GetCopyListSoldiers()
+        {
+            List<Soldier> soldiers = new List<Soldier>();
+
+            foreach (Soldier soldier in _soldiers)
+                soldiers.Add(soldier);
+
+            return soldiers;
+        }
+
         public void ShowStats()
         {
             foreach (Soldier soldier in _soldiers)
@@ -143,22 +158,13 @@ namespace War
 
         private void DeleteDeads()
         {
-            bool isRunning = true;
-
-            while (isRunning && _soldiers.Count != 0)
+            for (int i = 0; i < _soldiers.Count; i++)
             {
-                foreach (Soldier soldier in _soldiers)
+                if (_soldiers[i].Health <= 0)
                 {
-                    if (soldier.Health <= 0)
-                    {
-                        soldier.ShowMessageDead();
+                    _soldiers[i].ShowMessageDead();
 
-                        _soldiers.Remove(soldier);
-                        isRunning = true;
-                        break;
-                    }
-
-                    isRunning = false;
+                    _soldiers.Remove(_soldiers[i]);
                 }
             }
         }
@@ -166,10 +172,11 @@ namespace War
         private List<Soldier> GenerateSoldiers()
         {
             int platoonStrength = 15;
+            int unitRatio = 6;
 
-            int numberSniper = platoonStrength / 6;
-            int numberGrenadier = platoonStrength / 6;
-            int numberAutomaticRifleman = platoonStrength / 6;
+            int numberSniper = platoonStrength / unitRatio;
+            int numberGrenadier = platoonStrength / unitRatio;
+            int numberAutomaticRifleman = platoonStrength / unitRatio;
             int numberSoldier = platoonStrength - numberSniper - numberGrenadier - numberAutomaticRifleman;
 
             List<Soldier> soldiers = new List<Soldier>();
@@ -190,21 +197,38 @@ namespace War
         }
     }
 
-    class Soldier
+    class CreatorSoldier
     {
         protected string Name;
         protected int Damage;
         protected int Armor = 1;
 
-        public Soldier()
+        public CreatorSoldier()
         {
             Name = GetName();
-            Health = GenerateHealth();
-            Damage = GenerateDamage();
+
+            int minLimitHealth = 15;
+            int maxLimitHealth = 20;
+
+            int minLimitDamage = 1;
+            int maxLimitDamage = 5;
+
+            Health = UserUtils.GenerateRandomNumber(minLimitHealth, maxLimitHealth);
+            Damage = UserUtils.GenerateRandomNumber(minLimitDamage, maxLimitDamage);
         }
 
-        public int Health { get; private set; }
+        public int Health { get; protected set; }
 
+        private string GetName()
+        {
+            List<string> names = new List<string>() { "Крис Тэйлор", "Боб Барнс", "Элиас Гродин", "Ред О’Нил", "Кинг", "Банни", "Текс", "Менни", "Гарднер", "Кроуфорд", "Гейтор Лернер" };
+
+            return names[UserUtils.GenerateRandomNumber(0, names.Count - 1)];
+        }
+    }
+
+    class Soldier : CreatorSoldier
+    {
         public virtual void Attack(List<Soldier> soldiers)
         {
             soldiers[UserUtils.GenerateRandomNumber(0, soldiers.Count)].TakeDamage(Damage);
@@ -233,29 +257,6 @@ namespace War
         private void ShowMessageWound()
         {
             Console.WriteLine($"{Name} - получил ранение, у него осталось {Health}.");
-        }
-
-        private string GetName()
-        {
-            List<string> names = new List<string>() { "Крис Тэйлор", "Боб Барнс", "Элиас Гродин", "Ред О’Нил", "Кинг", "Банни", "Текс", "Менни", "Гарднер", "Кроуфорд", "Гейтор Лернер" };
-
-            return names[UserUtils.GenerateRandomNumber(0, names.Count - 1)];
-        }
-
-        private int GenerateHealth()
-        {
-            int minLimitHealth = 15;
-            int maxLimitHealth = 20;
-
-            return UserUtils.GenerateRandomNumber(minLimitHealth, maxLimitHealth);
-        }
-
-        private int GenerateDamage()
-        {
-            int minLimitDamage = 1;
-            int maxLimitDamage = 5;
-
-            return UserUtils.GenerateRandomNumber(minLimitDamage, maxLimitDamage);
         }
     }
 
